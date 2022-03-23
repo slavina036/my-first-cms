@@ -100,6 +100,7 @@ h3.categoryDescription {
 
 #headlines.archive .summary {
   padding-left: 130px;
+  width: 50ch;
 }
 
 .category {
