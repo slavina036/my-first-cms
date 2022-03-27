@@ -41,7 +41,7 @@ class Article
     *
     * @param assoc Значения свойств
     */
-
+    public $active = null;
     /*
     public function __construct( $data=array() ) {
       if ( isset( $data['id'] ) ) {$this->id = (int) $data['id'];}
@@ -85,7 +85,9 @@ class Article
       if (isset($data['content'])) {
           $this->content = $data['content'];  
       }
-    }
+      
+      $this->active = !empty($data['active']);  
+     }
 
 
     /**
@@ -146,7 +148,7 @@ class Article
     {
         $conn = new PDO(DB_DSN, DB_USERNAME, DB_PASSWORD);
         $fromPart = "FROM articles";
-        $categoryClause = $categoryId ? "WHERE categoryId = :categoryId" : "";
+        $categoryClause = $categoryId ? "WHERE categoryId = :categoryId" : "";  
         $sql = "SELECT *, UNIX_TIMESTAMP(publicationDate) 
                 AS publicationDate
                 $fromPart $categoryClause
@@ -227,7 +229,7 @@ class Article
       // Обновляем статью
       $conn = new PDO( DB_DSN, DB_USERNAME, DB_PASSWORD );
       $sql = "UPDATE articles SET publicationDate=FROM_UNIXTIME(:publicationDate),"
-              . " categoryId=:categoryId, title=:title, summary=:summary,"
+              . " categoryId=:categoryId, title=:title, summary=:summary, active=:active,"
               . " content=:content WHERE id = :id";
       
       $st = $conn->prepare ( $sql );
@@ -236,6 +238,7 @@ class Article
       $st->bindValue( ":title", $this->title, PDO::PARAM_STR );
       $st->bindValue( ":summary", $this->summary, PDO::PARAM_STR );
       $st->bindValue( ":content", $this->content, PDO::PARAM_STR );
+      $st->bindValue( ":active", $this->active, PDO::PARAM_INT );
       $st->bindValue( ":id", $this->id, PDO::PARAM_INT );
       $st->execute();
       $conn = null;

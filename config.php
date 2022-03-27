@@ -46,7 +46,7 @@ try {
 function defineConstants($constatsNameAndValues)
 {
     // обходим массив и определяем нужные константы
-    foreach ($constatsNameAndValues as $constName => $constValue) {
+    foreach ($constatsNameAndValues as $constName => $constValue) { 
        define($constName, $constValue);
     }
 }

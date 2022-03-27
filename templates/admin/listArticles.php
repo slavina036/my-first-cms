@@ -17,6 +17,7 @@
               <th>Publication Date</th>
               <th>Article</th>
               <th>Category</th>
+              <th>Active</th>
             </tr>
 
 <!--<?php echo "<pre>"; print_r ($results['articles'][2]->publicationDate); echo "</pre>"; ?> Обращаемся к дате массива $results. Дата = 0 -->
@@ -42,10 +43,13 @@
                 echo "Без категории";
                 }?>
               </td>
+              <td>
+                  <input type="checkbox" name="active" id="active" value="1" <?= $article->active ? 'checked' : '' ?> disabled>
+              </td>
             </tr>
 
     <?php } ?>
-
+            
           </table>
 
           <p><?php echo $results['totalRows']?> article<?php echo ( $results['totalRows'] != 1 ) ? 's' : '' ?> in total.</p>

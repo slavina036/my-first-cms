@@ -24,7 +24,7 @@
                     <span class="category">
                         <?php echo "Без категории"?>
                     </span>
-                <?php } ?>
+        <?php } ?>
             </h2>
             <p class="summary"><?php echo mb_substr(htmlspecialchars($article->content), 0, 50, 'utf8').'...'?></p>
             <img id="loader-identity" src="JS/ajax-loader.gif" alt="gif">
