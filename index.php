@@ -86,7 +86,8 @@ function viewArticle()
 function homepage() 
 {
     $results = array();
-    $data = Article::getList(HOMEPAGE_NUM_ARTICLES);
+    $data = Article::getList(HOMEPAGE_NUM_ARTICLES, $categoryId=null, 
+            $order="publicationDate DESC", $active=1);
     $results['articles'] = $data['results'];
     $results['totalRows'] = $data['totalRows'];
     

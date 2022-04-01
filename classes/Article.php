@@ -144,14 +144,25 @@ class Article
     * @return Array|false Двух элементный массив: results => массив объектов Article; totalRows => общее количество строк
     */
     public static function getList($numRows=1000000, 
-            $categoryId=null, $order="publicationDate DESC") 
+            $categoryId=null, $order="publicationDate DESC", $active=null) 
     {
         $conn = new PDO(DB_DSN, DB_USERNAME, DB_PASSWORD);
         $fromPart = "FROM articles";
-        $categoryClause = $categoryId ? "WHERE categoryId = :categoryId" : "";  
+        $clause = '';
+        if (!empty($categoryId)) {
+            if (!empty($active)) {
+                $clause = "WHERE catogoryId = :categoryId AND active=1";
+            } else {
+                $clause = "WHERE catogoryId = :categoryId";
+            }
+        } else if (!empty($active)) {
+            $clause = "WHERE active=1";
+        }
+        $activeClause = $active ? " active = :active" : "";
+        $categoryClause = $categoryId ? "WHERE categoryId = :categoryId" : ""; 
         $sql = "SELECT *, UNIX_TIMESTAMP(publicationDate) 
                 AS publicationDate
-                $fromPart $categoryClause
+                $fromPart $clause
                 ORDER BY  $order  LIMIT :numRows";
         
         $st = $conn->prepare($sql);
