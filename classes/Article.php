@@ -158,8 +158,6 @@ class Article
         } else if (!empty($active)) {
             $clause = "WHERE active=1";
         }
-        $activeClause = $active ? " active = :active" : "";
-        $categoryClause = $categoryId ? "WHERE categoryId = :categoryId" : ""; 
         $sql = "SELECT *, UNIX_TIMESTAMP(publicationDate) 
                 AS publicationDate
                 $fromPart $clause
@@ -188,7 +186,7 @@ class Article
         }
 
         // Получаем общее количество статей, которые соответствуют критерию
-        $sql = "SELECT COUNT(*) AS totalRows $fromPart $categoryClause";
+        $sql = "SELECT COUNT(*) AS totalRows $fromPart $clause";
         $totalRows = $conn->query($sql)->fetch();
         $conn = null;
         
