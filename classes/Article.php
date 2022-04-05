@@ -151,12 +151,12 @@ class Article
         $clause = '';
         if (!empty($categoryId)) {
             if (!empty($active)) {
-                $clause = "WHERE catogoryId = :categoryId AND active=1";
+                $clause = "WHERE categoryId = :categoryId AND active= :active";
             } else {
-                $clause = "WHERE catogoryId = :categoryId";
+                $clause = "WHERE categoryId = :categoryId";
             }
         } else if (!empty($active)) {
-            $clause = "WHERE active=1";
+            $clause = "WHERE active= :active";
         }
         $sql = "SELECT *, UNIX_TIMESTAMP(publicationDate) 
                 AS publicationDate
@@ -169,6 +169,8 @@ class Article
 //                        echo "</pre>";
 //                        Здесь $st - текст предполагаемого SQL-запроса, причём переменные не отображаются
         $st->bindValue(":numRows", $numRows, PDO::PARAM_INT);
+        if(!empty($active))
+            $st->bindValue(":active", $active, PDO::PARAM_INT);
         
         if ($categoryId) 
             $st->bindValue( ":categoryId", $categoryId, PDO::PARAM_INT);
@@ -187,7 +189,13 @@ class Article
 
         // Получаем общее количество статей, которые соответствуют критерию
         $sql = "SELECT COUNT(*) AS totalRows $fromPart $clause";
-        $totalRows = $conn->query($sql)->fetch();
+        $st = $conn->prepare($sql);
+        if(!empty($active))
+            $st->bindValue(":active", $active, PDO::PARAM_INT);
+        if ($categoryId) 
+            $st->bindValue( ":categoryId", $categoryId, PDO::PARAM_INT);
+        $st->execute();
+        $totalRows = $st->fetch();
         $conn = null;
         
         return (array(
