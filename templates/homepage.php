@@ -14,9 +14,22 @@
                 
                 <?php if (isset($article->categoryId)) { ?>
                     <span class="category">
-                        in 
-                        <a href=".?action=archive&amp;categoryId=<?php echo $article->categoryId?>">
-                            <?php echo htmlspecialchars($results['categories'][$article->categoryId]->name )?>
+                        <a href=".?action=archive&amp;categoryId=<?php echo $article->categoryId?>">                           
+                            <?php echo htmlspecialchars($results['categories'][$article->categoryId]->name )?>                          
+                        </a>
+                    </span>
+                <?php } 
+                else { ?>
+                    <span class="category">
+                        <?php echo "Без категории"?>
+                    </span>
+        <?php } ?>
+                <?php if (isset($article->subcategoryId)) { ?>
+                    <span class="category">
+                        <a href=".?action=archive&amp;subcategoryId=<?php echo $article->subcategoryId?>">
+                            
+                            <?php echo htmlspecialchars($results['subcategories'][$article->subcategoryId]->name )?>
+                            
                         </a>
                     </span>
                 <?php } 
@@ -39,7 +52,7 @@
         </li>
     <?php } ?>
     </ul>
-    <p><a href="./?action=archive">Article Archive</a></p>
+    <p><a href="./?action=archive">Архив статей</a></p>
 <?php include "templates/include/footer.php" ?>
 
     

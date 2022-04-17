@@ -1,7 +1,7 @@
 <?php include "templates/include/header.php" ?>
 <?php include "templates/admin/include/header.php" ?>
 	  
-    <h1>All Articles</h1>
+    <h1>Все статьи</h1>
 
     <?php if ( isset( $results['errorMessage'] ) ) { ?>
             <div class="errorMessage"><?php echo $results['errorMessage'] ?></div>
@@ -14,10 +14,11 @@
 
           <table>
             <tr>
-              <th>Publication Date</th>
-              <th>Article</th>
-              <th>Category</th>
-              <th>Active</th>
+              <th>Дата публикации</th>
+              <th>Статья</th>
+              <th>Категория</th>
+              <th>Подкатегория</th>
+              <th>Активность</th>
             </tr>
 
 <!--<?php echo "<pre>"; print_r ($results['articles'][2]->publicationDate); echo "</pre>"; ?> Обращаемся к дате массива $results. Дата = 0 -->
@@ -44,6 +45,21 @@
                 }?>
               </td>
               <td>
+                  
+             <!--   <?php echo $results['subcategories'][$article->subcategoryId]->name?> Эта строка была скопирована с сайта-->
+             <!-- <?php echo "<pre>"; print_r ($article); echo "</pre>"; ?> Здесь объект $article содержит в себе только ID подкатегории. А надо по ID достать название подкатегории-->
+            <!--<?php echo "<pre>"; print_r ($results); echo "</pre>"; ?> Здесь есть доступ к полному объекту $results -->
+             
+                 <?php 
+                if(isset ($article->subcategoryId)) {
+                    echo $results['subcategories'][$article->subcategoryId]->name;                        
+                }
+                else {
+                echo "Без подкатегории";
+                }?> 
+              </td>
+              
+              <td>
                   <input type="checkbox" name="active" id="active" value="1" <?= $article->active ? 'checked' : '' ?> disabled>
               </td>
             </tr>
@@ -52,8 +68,8 @@
             
           </table>
 
-          <p><?php echo $results['totalRows']?> article<?php echo ( $results['totalRows'] != 1 ) ? 's' : '' ?> in total.</p>
+          <p>Всего статей: <?php echo $results['totalRows']?></p>
 
-          <p><a href="admin.php?action=newArticle">Add a New Article</a></p>
+          <p><a href="admin.php?action=newArticle">Добавить новую статью</a></p>
 
 <?php include "templates/include/footer.php" ?>              

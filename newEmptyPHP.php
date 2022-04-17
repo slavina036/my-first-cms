@@ -494,7 +494,7 @@ function deleteSubcategory() {
     }
 
     $subcategory->delete();
-    header( "Location: admin.php?action=listSubcategories&status=subcategoryDeleted" );
+    header( "Location: admin.php?action=listSubcategories&status=categoryDeleted" );
 }
 
 

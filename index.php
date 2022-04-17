@@ -36,7 +36,14 @@ function archive()
     
     $results['category'] = Category::getById( $categoryId );
     
-    $data = Article::getList( 100000, $results['category'] ? $results['category']->id : null );
+    $subcategoryId = ( isset( $_GET['subcategoryId'] ) && $_GET['subcategoryId'] ) ? (int)$_GET['subcategoryId'] : null;
+    
+    $results['subcategory'] = Subcategory::getById( $subcategoryId );
+    
+    $data = Article::getList( $numRows=1000000, 
+            $results['category'] ? $results['category']->id : null, 
+            $order="publicationDate DESC", $active=null, 
+            $results['subcategory'] ? $results['subcategory']->id : null );
     
     $results['articles'] = $data['results'];
     $results['totalRows'] = $data['totalRows'];
@@ -48,7 +55,15 @@ function archive()
         $results['categories'][$category->id] = $category;
     }
     
-    $results['pageHeading'] = $results['category'] ?  $results['category']->name : "Article Archive";
+    $data =Subcategory::getList();
+    $results['subcategories'] = array();
+    
+    foreach ( $data['results'] as $subcategory ) {
+        $results['subcategories'][$subcategory->id] = $subcategory;
+    }
+    
+    $results['pageHeading'] = $results['category'] ?  $results['category']->name : "Архив";
+    $results['pageHeading'] = $results['subcategory'] ?  $results['subcategory']->name : "Архив";
     $results['pageTitle'] = $results['pageHeading'] . " | Widget News";
     
     require( TEMPLATE_PATH . "/archive.php" );
@@ -95,6 +110,12 @@ function homepage()
     $results['categories'] = array();
     foreach ( $data['results'] as $category ) { 
         $results['categories'][$category->id] = $category;
+    } 
+    
+    $data = Subcategory::getList();
+    $results['subcategories'] = array();
+    foreach ( $data['results'] as $subcategory ) { 
+        $results['subcategories'][$subcategory->id] = $subcategory;
     } 
     
     $results['pageTitle'] = "Простая CMS на PHP";

@@ -14,26 +14,26 @@
         <ul>
 
           <li>
-            <label for="name">Category Name</label>
-            <input type="text" name="name" id="name" placeholder="Name of the category" required autofocus maxlength="255" value="<?php echo htmlspecialchars( $results['category']->name )?>" />
+            <label for="name">Название</label>
+            <input type="text" name="name" id="name" placeholder="Название категории" required autofocus maxlength="255" value="<?php echo htmlspecialchars( $results['category']->name )?>" />
           </li>
 
           <li>
-            <label for="description">Description</label>
-            <textarea name="description" id="description" placeholder="Brief description of the category" required maxlength="1000" style="height: 5em;"><?php echo htmlspecialchars( $results['category']->description )?></textarea>
+            <label for="description">Описание</label>
+            <textarea name="description" id="description" placeholder="Краткое описание категории" required maxlength="1000" style="height: 5em;"><?php echo htmlspecialchars( $results['category']->description )?></textarea>
           </li>
 
         </ul>
 
         <div class="buttons">
-          <input type="submit" name="saveChanges" value="Save Changes" />
-          <input type="submit" formnovalidate name="cancel" value="Cancel" />
+          <input type="submit" name="saveChanges" value="Сохранить" />
+          <input type="submit" formnovalidate name="cancel" value="Отменить" />
         </div>
 
       </form>
 
     <?php if ( $results['category']->id ) { ?>
-          <p><a href="admin.php?action=deleteCategory&amp;categoryId=<?php echo $results['category']->id ?>" onclick="return confirm('Delete This Category?')">Delete This Category</a></p>
+          <p><a href="admin.php?action=deleteCategory&amp;categoryId=<?php echo $results['category']->id ?>" onclick="return confirm('Удалить эту категорию?')">Удалить категорию</a></p>
     <?php } ?>
 
 <?php include "templates/include/footer.php" ?>
