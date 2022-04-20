@@ -1,6 +1,6 @@
 
 <?php include "templates/include/header.php" ?>
-    <ul id="headlines">
+    <ul id="headlines">   
     <?php foreach ($results['articles'] as $article) { ?>
         <li class='<?php echo $article->id?>'>
             <h2>
@@ -13,7 +13,8 @@
                 </a>
                 
                 <?php if (isset($article->categoryId)) { ?>
-                    <span class="category">
+                    <span class="category">     
+                        Категория: 
                         <a href=".?action=archive&amp;categoryId=<?php echo $article->categoryId?>">                           
                             <?php echo htmlspecialchars($results['categories'][$article->categoryId]->name )?>                          
                         </a>
@@ -23,9 +24,11 @@
                     <span class="category">
                         <?php echo "Без категории"?>
                     </span>
-        <?php } ?>
+               <?php } ?>
+                
                 <?php if (isset($article->subcategoryId)) { ?>
                     <span class="category">
+                        Подкатегрия: 
                         <a href=".?action=archive&amp;subcategoryId=<?php echo $article->subcategoryId?>">
                             
                             <?php echo htmlspecialchars($results['subcategories'][$article->subcategoryId]->name )?>
@@ -38,6 +41,19 @@
                         <?php echo "Без категории"?>
                     </span>
         <?php } ?>
+                
+                <span class="category">
+                    Авторы: 
+                    
+                    <br>
+                    <?php
+                        foreach ($article->authors as $key => $author) { ?>
+                    <a href=".?action=archive&amp;userId=<?php echo $author->id?>">
+                        <?= $author->login?>
+                    </a><br>
+                    <?php } ?>
+                </span>
+                
             </h2>
             <p class="summary"><?php echo mb_substr(htmlspecialchars($article->content), 0, 50, 'utf8').'...'?></p>
             <img id="loader-identity" src="JS/ajax-loader.gif" alt="gif">

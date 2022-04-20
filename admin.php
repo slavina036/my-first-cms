@@ -145,6 +145,7 @@ function newArticle() {
 //            print_r($results);
 //            print_r($_POST);
 //            echo "<pre>";
+//            die();
 //            В $_POST данные о статье сохраняются корректно
         // Пользователь получает форму редактирования статьи: сохраняем новую статью
         $article = new Article();
@@ -152,6 +153,7 @@ function newArticle() {
 //            echo "<pre>";
 //            print_r($article);
 //            echo "<pre>";
+//            die();
 //            А здесь данные массива $article уже неполные(есть только Число от даты, категория и полный текст статьи)          
         $article->insert();
         header( "Location: admin.php?status=changesSaved" );
@@ -167,6 +169,7 @@ function newArticle() {
         $data = Category::getList();
         $results['categories'] = $data['results'];
         $results['subcategories'] = Subcategory::getList(order: 'sc.categoryId');
+        $results['authors'] = User::getList();
         require( TEMPLATE_PATH . "/admin/editArticle.php" );
     }
 }
@@ -206,6 +209,7 @@ function editArticle() {
         $data = Category::getList();
         $results['categories'] = $data['results'];
         $results['subcategories'] = Subcategory::getList(order: 'sc.categoryId');
+        $results['authors'] = User::getList();
         require(TEMPLATE_PATH . "/admin/editArticle.php");
     }
 

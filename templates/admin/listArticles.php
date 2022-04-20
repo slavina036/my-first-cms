@@ -18,6 +18,7 @@
               <th>Статья</th>
               <th>Категория</th>
               <th>Подкатегория</th>
+              <th>Авторы</th>
               <th>Активность</th>
             </tr>
 
@@ -27,15 +28,15 @@
 
             <tr onclick="location='admin.php?action=editArticle&amp;articleId=<?php echo $article->id?>'">
               <td><?php echo date('j M Y', $article->publicationDate)?></td>
+              
               <td>
                 <?php echo $article->title?>
               </td>
+              
               <td>
-                  
-             <!--   <?php echo $results['categories'][$article->categoryId]->name?> Эта строка была скопирована с сайта-->
-             <!-- <?php echo "<pre>"; print_r ($article); echo "</pre>"; ?> Здесь объект $article содержит в себе только ID категории. А надо по ID достать название категории-->
+            <!--<?php echo $results['categories'][$article->categoryId]->name?> Эта строка была скопирована с сайта-->
+            <!--<?php echo "<pre>"; print_r ($article); echo "</pre>"; ?> Здесь объект $article содержит в себе только ID категории. А надо по ID достать название категории-->
             <!--<?php echo "<pre>"; print_r ($results); echo "</pre>"; ?> Здесь есть доступ к полному объекту $results -->
-             
                 <?php 
                 if(isset ($article->categoryId)) {
                     echo $results['categories'][$article->categoryId]->name;                        
@@ -44,19 +45,28 @@
                 echo "Без категории";
                 }?>
               </td>
+              
               <td>
-                  
-             <!--   <?php echo $results['subcategories'][$article->subcategoryId]->name?> Эта строка была скопирована с сайта-->
-             <!-- <?php echo "<pre>"; print_r ($article); echo "</pre>"; ?> Здесь объект $article содержит в себе только ID подкатегории. А надо по ID достать название подкатегории-->
+            <!--<?php echo $results['subcategories'][$article->subcategoryId]->name?> Эта строка была скопирована с сайта-->
+            <!--<?php echo "<pre>"; print_r ($article); echo "</pre>"; ?> Здесь объект $article содержит в себе только ID подкатегории. А надо по ID достать название подкатегории-->
             <!--<?php echo "<pre>"; print_r ($results); echo "</pre>"; ?> Здесь есть доступ к полному объекту $results -->
-             
-                 <?php 
-                if(isset ($article->subcategoryId)) {
-                    echo $results['subcategories'][$article->subcategoryId]->name;                        
-                }
-                else {
-                echo "Без подкатегории";
-                }?> 
+                <?php 
+                    if(isset ($article->subcategoryId)) {
+                        echo $results['subcategories'][$article->subcategoryId]->name;                        
+                    }
+                    else {
+                        echo "Без подкатегории";
+                    }?> 
+              </td>
+              
+              <td>
+                <?php 
+                    if (isset ($article->authorsId)) {
+                        foreach ($article->authorsId as $key => $authorId) {
+                            echo $authorId->login?><br><?php    
+                            
+                        }    
+                    }?>
               </td>
               
               <td>

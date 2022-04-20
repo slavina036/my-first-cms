@@ -60,8 +60,8 @@ class Article
      */
     public function __construct($data=array())
     {
-        
-      if (isset($data['id'])) {
+
+        if (isset($data['id'])) {
           $this->id = (int) $data['id'];
       }
       
@@ -89,11 +89,11 @@ class Article
           $this->content = $data['content'];  
       }
       
-      if (isset($data['$authors'])) {
-          $this->authors = $data['authors'];  
+      if (isset($data['authors'])){
+          $this->authors = (array) $data['authors'];  
       }
       
-      $this->active = !empty($data['active']);  
+      $this->active = !empty($data['active']); 
      }
 
 
@@ -103,6 +103,7 @@ class Article
     * @param assoc Значения записи формы
     */
     public function storeFormValues ( $params ) {
+        
       if (isset($params['subcategoryId'])) {
           $subcategory = Subcategory::getById($params['subcategoryId']);
           $categoryId = $subcategory->categoryId;
@@ -110,8 +111,12 @@ class Article
       }
       // Сохраняем все параметры
       $this->__construct( $params );
-
-      // Разбираем и сохраняем дату публикации
+      
+//echo "<pre>";
+//print_r($params);
+//echo "</pre>";
+//die();
+        // Разбираем и сохраняем дату публикации
       if ( isset($params['publicationDate']) ) {
         $publicationDate = explode ( '-', $params['publicationDate'] );
 
@@ -141,44 +146,35 @@ class Article
         $row = $st->fetch();
         $conn = null;
         
-        $listAuthors = getAuthors($id);
-        echo "<pre>";
-        print_r($row);
-        print_r($authors);
-        echo "</pre>";
-        die();
-        
- 
         if ($row) { 
-           // return new Article($row);
+            
+            $row['authors'] = self::getAuthors($id);
+            $article = new Article($row);
+            
+            return $article;
         }
-        
-        
     }
 
     
     /**
-    * Получаем из базы данных имена авторов статьи по ID статьи
-    */
-   public function getAuthors($id) {
-    
+     * Получаем из базы данных имена авторов статьи по ID статьи
+     */
+   public static function getAuthors($id): array
+   {
         $conn = new PDO( DB_DSN, DB_USERNAME, DB_PASSWORD );
-        $sql = "SELECT * FROM users u JOIN authors a ON u.id = a.userId "
-                . "where a.articleId = :id";
+        $sql = "SELECT u.* FROM users u JOIN users_articles ua ON u.id = ua.userId "
+                . "where ua.articleId = :id";
         $st = $conn->prepare($sql);
         $st->bindValue(":id", $id, PDO::PARAM_INT);
         $st->execute();
         
-        $listAuthors = array();
-        
-        while ($row = $st->fetch()) {
-            $users = new User($row);
-            $list[] = $users;
-        }
-        
-        return ("results" => $listAuthors);
+        $authors = $st->fetchAll();
+        return array_map(
+            fn(array $row): User => new User($row),
+            $authors
+        );
     }
-
+    
 
     /**
     * Возвращает все (или диапазон) объекты Article из базы данных
@@ -189,29 +185,38 @@ class Article
     * @param string $order Столбец, по которому выполняется сортировка статей (по умолчанию = "publicationDate DESC")
     * @return Array|false Двух элементный массив: results => массив объектов Article; totalRows => общее количество строк
     */
-    public static function getList($numRows=1000000, 
-            $categoryId=null, $order="publicationDate DESC", $active=null, $subcategoryId=null) 
+    public static function getList($numRows=1000000, $categoryId=null, 
+                                   $order="publicationDate DESC", $active=null, 
+                                   $subcategoryId=null, $userId=null) 
     {
         $conn = new PDO(DB_DSN, DB_USERNAME, DB_PASSWORD);
         $fromPart = "FROM articles";
         $clause = '';
-        $clauses = [];
         
-        if (!empty($categoryId)) {
-            $clauses[] = 'categoryId = :categoryId';
-        }
-        if (!empty($active)) {
-            $clauses[] = 'active= :active';
-        }
-        if (!empty($subcategoryId)) {
-            $clauses[] = 'subcategoryId = :subcategoryId';
+        if (!empty($userId)) {
+            $clause = " JOIN users_articles ON users_articles.articleId = articles.id "
+                    . "WHERE users_articles.userId = :userId ";
+        } else {
+            
+            $clauses = [];
+
+            if (!empty($categoryId)) {
+                $clauses[] = 'categoryId = :categoryId';
+            }
+            if (!empty($active)) {
+                $clauses[] = 'active= :active';
+            }
+            if (!empty($subcategoryId)) {
+                $clauses[] = 'subcategoryId = :subcategoryId';
+            }
+
+            $clause = implode(' AND ', $clauses);
+
+            if (!empty($clause)) {
+                $clause = " WHERE $clause ";
+            }
         }
         
-        $clause = implode(' AND ', $clauses);
-        
-        if (!empty($clause)) {
-            $clause = " WHERE $clause ";
-        }
         $sql = "SELECT *, UNIX_TIMESTAMP(publicationDate) 
                 AS publicationDate
                 $fromPart $clause
@@ -219,9 +224,10 @@ class Article
         $st = $conn->prepare($sql);
 //                        echo "<pre>";
 //                        print_r($st);
-//                        echo "</pre>";
+//                        echo "</pre>"; die();
 //                        Здесь $st - текст предполагаемого SQL-запроса, причём переменные не отображаются
         $st->bindValue(":numRows", $numRows, PDO::PARAM_INT);
+        
         if(!empty($active))
             $st->bindValue(":active", $active, PDO::PARAM_INT);
         
@@ -231,18 +237,22 @@ class Article
         if ($subcategoryId) 
             $st->bindValue( ":subcategoryId", $subcategoryId, PDO::PARAM_INT);
         
+        if ($userId) 
+            $st->bindValue( ":userId", $userId, PDO::PARAM_INT);
+        
         $st->execute(); // выполняем запрос к базе данных
 //                        echo "<pre>";
 //                        print_r($st);
 //                        echo "</pre>";
 //                        Здесь $st - текст предполагаемого SQL-запроса, причём переменные не отображаются
         $list = array();
-
+        
         while ($row = $st->fetch()) {
+            $row['authors'] = self::getAuthors($row['id']);
             $article = new Article($row);
             $list[] = $article;
         }
-
+            
         // Получаем общее количество статей, которые соответствуют критерию
         $sql = "SELECT COUNT(*) AS totalRows $fromPart $clause";
         $st = $conn->prepare($sql);
@@ -252,6 +262,8 @@ class Article
             $st->bindValue( ":categoryId", $categoryId, PDO::PARAM_INT);
         if ($subcategoryId) 
             $st->bindValue( ":subcategoryId", $subcategoryId, PDO::PARAM_INT);
+        if ($userId) 
+            $st->bindValue( ":userId", $userId, PDO::PARAM_INT);
         $st->execute();
         $totalRows = $st->fetch();
         $conn = null;
@@ -273,10 +285,9 @@ class Article
     * Вставляем текущий объек Article в базу данных, устанавливаем его ID.
     */
     public function insert() {
-
+        
         // Есть уже у объекта Article ID?
         if ( !is_null( $this->id ) ) trigger_error ( "Article::insert(): Attempt to insert an Article object that already has its ID property set (to $this->id).", E_USER_ERROR );
-
         // Вставляем статью
         $conn = new PDO( DB_DSN, DB_USERNAME, DB_PASSWORD );
         $sql = "INSERT INTO articles ( publicationDate, categoryId, subcategoryId, title, summary, content, active ) VALUES ( FROM_UNIXTIME(:publicationDate), :categoryId, :subcategoryId, :title, :summary, :content, :active )";
@@ -291,6 +302,24 @@ class Article
         $st->execute();
         $this->id = $conn->lastInsertId();
         $conn = null;
+        
+        echo "<pre>"; 
+        print_r($this);
+        echo "</pre>"; die();
+        
+        
+        foreach ($this->authors as $key => $userId) {
+            echo $userId;
+            $conn = new PDO( DB_DSN, DB_USERNAME, DB_PASSWORD );
+            $sql = "INSERT INTO authors (userId, articleId) VALUES (:userId, :articleId)";
+            $st = $conn->prepare($sql);
+            $st->bindValue( ":userId", $userId, PDO::PARAM_INT );
+            $st->bindValue( ":articleId", $this->id, PDO::PARAM_INT );
+            $st->execute();
+            $conn = null;
+            
+        }
+//        die();
     }
 
     /**
@@ -306,8 +335,8 @@ class Article
       // Обновляем статью
       $conn = new PDO( DB_DSN, DB_USERNAME, DB_PASSWORD );
       $sql = "UPDATE articles SET publicationDate=FROM_UNIXTIME(:publicationDate),"
-              . " categoryId=:categoryId,subcategoryId=:subcategoryId, title=:title, summary=:summary, active=:active,"
-              . " content=:content WHERE id = :id";
+              . " categoryId=:categoryId, subcategoryId=:subcategoryId, title=:title, "
+              . " summary=:summary, active=:active, content=:content WHERE id = :id";
       
       $st = $conn->prepare ( $sql );
       $st->bindValue( ":publicationDate", $this->publicationDate, PDO::PARAM_INT );
@@ -320,6 +349,8 @@ class Article
       $st->bindValue( ":id", $this->id, PDO::PARAM_INT );
       $st->execute();
       $conn = null;
+      
+//      $sql = "UPDATE author SET "
     }
 
 

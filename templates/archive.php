@@ -19,12 +19,12 @@
                     <span class="pubDate">
                         <?php echo date('j F Y', $article->publicationDate)?>
                     </span>
-                    <a href=".?action=viewArticle&amp;articleId=<?php echo $article->id?>">
-                        <?php echo htmlspecialchars( $article->title )?>
-                    </a>
+                        <a href=".?action=viewArticle&amp;articleId=<?php echo $article->id?>">
+                            <?php echo htmlspecialchars( $article->title )?>
+                        </a>
 
                     <?php if ( !$results['category'] && $article->categoryId ) { ?>
-                    <span class="category">
+                    <span class="category">Категория: 
                         <a href=".?action=archive&amp;categoryId=<?php echo $article->categoryId?>">
                             <?php echo htmlspecialchars( $results['categories'][$article->categoryId]->name ) ?>
                         </a>
@@ -32,11 +32,9 @@
                     <?php } ?>          
                     
                         <?php if (isset($article->subcategoryId)) { ?>
-                    <span class="category">
+                    <span class="category">Подкатегория: 
                         <a href=".?action=archive&amp;subcategoryId=<?php echo $article->subcategoryId?>">
-                            
                             <?php echo htmlspecialchars($results['subcategories'][$article->subcategoryId]->name )?>
-                            
                         </a>
                     </span>
                 <?php } 
@@ -44,7 +42,18 @@
                     <span class="category">
                         <?php echo "Без подкатегории"?>
                     </span>
-        <?php } ?>          
+        <?php } ?>    
+                    
+                <span class="category">
+                    Авторы: 
+                    <br>
+                    <?php foreach ($article->authors as $key => $author) { ?>
+                    <a href=".?action=archive&amp;userId=<?php echo $author->id?>">
+                        <?= $author->login?>
+                    </a><br>
+                    <?php } ?>
+                </span>
+                    
                 </h2>
               <p class="summary"><?php echo htmlspecialchars( $article->summary )?></p>
             </li>

@@ -29,21 +29,22 @@ function initApplication()
 }
 
 function archive() 
-{
+{ 
     $results = [];
-    
     $categoryId = ( isset( $_GET['categoryId'] ) && $_GET['categoryId'] ) ? (int)$_GET['categoryId'] : null;
-    
     $results['category'] = Category::getById( $categoryId );
     
     $subcategoryId = ( isset( $_GET['subcategoryId'] ) && $_GET['subcategoryId'] ) ? (int)$_GET['subcategoryId'] : null;
-    
     $results['subcategory'] = Subcategory::getById( $subcategoryId );
     
+    $userId = ( isset( $_GET['userId'] ) && $_GET['userId'] ) ? (int)$_GET['userId'] : null;
+    $results['user'] = User::getById( $userId );
+
     $data = Article::getList( $numRows=1000000, 
             $results['category'] ? $results['category']->id : null, 
             $order="publicationDate DESC", $active=null, 
-            $results['subcategory'] ? $results['subcategory']->id : null );
+            $results['subcategory'] ? $results['subcategory']->id : null,
+            userId: $userId);
     
     $results['articles'] = $data['results'];
     $results['totalRows'] = $data['totalRows'];
@@ -64,6 +65,7 @@ function archive()
     
     $results['pageHeading'] = $results['category'] ?  $results['category']->name : "Архив";
     $results['pageHeading'] = $results['subcategory'] ?  $results['subcategory']->name : "Архив";
+    $results['pageHeading'] = $results['user'] ?  $results['user']->login : "Архив";
     $results['pageTitle'] = $results['pageHeading'] . " | Widget News";
     
     require( TEMPLATE_PATH . "/archive.php" );
@@ -90,6 +92,8 @@ function viewArticle()
     }
     
     $results['category'] = Category::getById($results['article']->categoryId);
+    $results['subcategory'] = SubCategory::getById($results['article']->subcategoryId);
+    
     $results['pageTitle'] = $results['article']->title . " | Простая CMS";
     
     require(TEMPLATE_PATH . "/viewArticle.php");
@@ -101,8 +105,8 @@ function viewArticle()
 function homepage() 
 {
     $results = array();
-    $data = Article::getList(HOMEPAGE_NUM_ARTICLES, $categoryId=null, 
-            $order="publicationDate DESC", $active=1);
+    $data = Article::getList(numRows: HOMEPAGE_NUM_ARTICLES,
+            order: "publicationDate DESC", active: 1);
     $results['articles'] = $data['results'];
     $results['totalRows'] = $data['totalRows'];
     
@@ -119,11 +123,6 @@ function homepage()
     } 
     
     $results['pageTitle'] = "Простая CMS на PHP";
-    
-//    echo "<pre>";
-//    print_r($data);
-//    echo "</pre>";
-//    die();
     
     require(TEMPLATE_PATH . "/homepage.php");
     

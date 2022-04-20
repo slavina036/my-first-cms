@@ -12,7 +12,8 @@
     <?php } ?>
 
             <ul>
-              <li>
+              <li> 
+                  <?php // echo "<pre>"; print_r($results); echo "</pre>";?>
                   <label for="title">Название</label>
                 <input type="text" name="title" id="title" placeholder="Название статьи" required autofocus maxlength="255" value="<?php echo htmlspecialchars( $results['article']->title )?>" />
               </li>
@@ -48,11 +49,30 @@
                 <?php } ?>   
                     </optgroup>
                 </select>
-                
-                
+              </li>
+               
+              <li>    
+                <lebel for="authors">Авторы</lebel>
+                <select name="authorsId[]" multiple required>
+                    <option value=""<?php echo !$results['article']->authors ? " selected" : "" ?> disabled>(Не выбрано)</option>
+                    <?php 
+
+                        $authorsIdList = array_map(
+                          fn(User $author): int => $author->id,
+                          $results['article']->authors ?? []
+                        );
+
+                      foreach ( $results['authors']['results'] as $user) {?>
+                        <option value="<?= $user->id?>"<?= (in_array($user->id, $authorsIdList)) ? " selected" : "" ?>><?php echo htmlspecialchars( $user->login )?></option>
+                      <?php } ?>
+                  </select>
+              </li>  
+              
+              <li>
                 <label for="publicationDate">Дата публикации</label>
                 <input type="date" name="publicationDate" id="publicationDate" placeholder="YYYY-MM-DD" required maxlength="10" value="<?php echo $results['article']->publicationDate ? date( "Y-m-d", $results['article']->publicationDate ) : "" ?>" />
               </li>
+              
               <li>
                   <label for="active">Активность</label>
                   <input type="checkbox" name="active" id="active" value="1" <?= $results['article']->active ? 'checked' : '' ?> />
