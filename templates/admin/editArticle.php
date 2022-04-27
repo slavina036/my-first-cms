@@ -53,7 +53,7 @@
                
               <li>    
                 <lebel for="authors">Авторы</lebel>
-                <select name="authorsId[]" multiple required>
+                <select name="authors[]" multiple required>
                     <option value=""<?php echo !$results['article']->authors ? " selected" : "" ?> disabled>(Не выбрано)</option>
                     <?php 
 

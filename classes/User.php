@@ -23,30 +23,30 @@ class User
     * @var int Активность пользователя
     */
     public $active = null;
-    
-    
+
+
     /**
      * Создаст объект пользователя
      */
     public function __construct($data=array())
     {
-        
+
       if (isset($data['id'])) {
           $this->id = (int) $data['id'];
       }
-      
+
       if (isset( $data['login'])) {
-          $this->login = (string) $data['login'];     
+          $this->login = (string) $data['login'];
       }
 
       if (isset($data['password'])) {
-          $this->password = (string) $data['password'];        
-      }      
-      
-      $this->active = !empty($data['active']);  
-     }
+          $this->password = (string) $data['password'];
+      }
 
-    
+      $this->active = !empty($data['active']);
+    }
+
+
     /**
     * Устанавливаем свойства с помощью значений формы редактирования записи в заданном массиве
     *
@@ -58,14 +58,14 @@ class User
       $this->__construct( $params );
     }
 
-    
+
     /**
     * Возвращаем объект пользователя соответствующий заданному ID
     *
     * @param int ID пользователя
     * @return User|false Объект пользователя или false, если запись не найдена или возникли проблемы
     */
-    public static function getById($id) 
+    public static function getById($id): ?User
     {
         $conn = new PDO( DB_DSN, DB_USERNAME, DB_PASSWORD );
         $sql = "SELECT * FROM users WHERE id = :id";
@@ -74,45 +74,45 @@ class User
         $st->execute();
         $row = $st->fetch();
         $conn = null;
-        
-        if ($row) { 
-            return new User($row);
-        }
+
+        return $row ?
+            new User($row) :
+            null;
     }
 
 
     /**
     * Возвращает все объекты Users из базы данных
     */
-    public static function getList() 
+    public static function getList()
     {
         $conn = new PDO(DB_DSN, DB_USERNAME, DB_PASSWORD);
         $sql = "SELECT * FROM users";
         $st = $conn->prepare($sql);
-        $st->execute(); 
+        $st->execute();
         $list = array();
 
         while ($row = $st->fetch()) {
             $user = new User($row);
             $list[] = $user;
         }
-        
+
         // Получаем общее количество пользователй
-        
+
         $sql = "SELECT COUNT(*) AS totalRows FROM users";
         $st = $conn->prepare($sql);
         $st->execute();
         $totalRows = $st->fetch();
         $conn = null;
-        
+
         return (array(
-            "results" => $list, 
+            "results" => $list,
             "totalRows" => $totalRows[0]
-            ) 
+            )
         );
     }
 
-    
+
     /**
     * Вставляем текущий объект статьи в базу данных, устанавливаем его свойства.
     * Вставляем текущий объек Article в базу данных, устанавливаем его ID.
@@ -134,7 +134,7 @@ class User
         $conn = null;
     }
 
-    
+
     /**
     * Обновляем текущий объект в базе данных
     */
@@ -145,10 +145,10 @@ class User
               . "Attempt to update an User object "
               . "that does not have its ID property set.", E_USER_ERROR );
 
-      // Обновляем 
-      $conn = new PDO( DB_DSN, DB_USERNAME, DB_PASSWORD ); 
+      // Обновляем
+      $conn = new PDO( DB_DSN, DB_USERNAME, DB_PASSWORD );
       $sql = "UPDATE users SET login = :login, password = :password, active = :active  WHERE id = :id";
-      
+
       $st = $conn->prepare ( $sql );
       $st->bindValue( ":login", $this->login, PDO::PARAM_STR );
       $st->bindValue( ":password", $this->password, PDO::PARAM_STR );
@@ -158,7 +158,7 @@ class User
       $conn = null;
     }
 
-    
+
     /**
     * Удаляем текущий объект статьи из базы данных
     */
@@ -174,6 +174,6 @@ class User
       $st->execute();
       $conn = null;
     }
-    
-    
+
+
 }

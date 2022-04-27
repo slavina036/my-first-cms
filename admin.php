@@ -194,6 +194,7 @@ function editArticle() {
             return;
         }
 
+        
         $article->storeFormValues( $_POST );
         $article->update();
         header( "Location: admin.php?status=changesSaved" );
