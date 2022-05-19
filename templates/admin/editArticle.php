@@ -1,6 +1,5 @@
 <?php include "templates/include/header.php" ?>
 <?php include "templates/admin/include/header.php" ?>
-
 <!--       Данные о массиве $results и типе формы передаются корректно-->
         <h1><?php echo $results['pageTitle']?></h1>
 
@@ -12,7 +11,7 @@
     <?php } ?>
 
             <ul>
-              <li> 
+              <li>
                   <?php // echo "<pre>"; print_r($results); echo "</pre>";?>
                   <label for="title">Название</label>
                 <input type="text" name="title" id="title" placeholder="Название статьи" required autofocus maxlength="255" value="<?php echo htmlspecialchars( $results['article']->title )?>" />
@@ -28,34 +27,54 @@
                 <textarea name="content" id="content" placeholder="HTML-содержимое статьи" required maxlength="100000" style="height: 30em;"><?php echo htmlspecialchars( $results['article']->content )?></textarea>
               </li>
 
+<!--              <li>
+                <label for="categoryId">Предыдущая статья</label>
+                <select name="previousArticleId">
+                  <option value=""<?php echo !$results['article']->previousArticleId ? " selected" : "" ?> disabled>(Не выбрано)</option>
+                    <?php foreach ($results['listArticlesIdTitle'] as $articleIdTitle) {?>
+                      <option value="<?= $articleIdTitle->id?>"><?php echo htmlspecialchars($articleIdTitle->title)?></option>
+                    <?php } ?>
+                </select>
+              </li>-->
+
+              <li>
+                <label for="categoryId">Следующая статья</label>
+                <select name="nextArticleId">
+                    <option value=""<?php echo !$results['article']->nextArticleId ? " selected" : "" ?> disabled>(Не выбрано)</option>
+                    <?php foreach ($results['listArticlesIdTitle'] as $articleIdTitle) {?>
+                      <option value="<?= $articleIdTitle->id?>"><?php echo htmlspecialchars($articleIdTitle->title)?></option>
+                    <?php } ?>
+                </select>
+              </li>
+
               <li>
                 <label for="categoryId">Категория и подкатегория</label>
                 <select name="subcategoryId" required>
                   <option value=""<?php echo !$results['article']->subcategoryId ? " selected" : ""?>>(Не выбрано)</option>
-                <?php 
+                <?php
                 $currentCategoryName = null;
-                foreach ( $results['subcategories']['results'] as $subcategory ) { 
+                foreach ( $results['subcategories']['results'] as $subcategory ) {
                     if($currentCategoryName !== $subcategory->categoryName) {
                         if (!is_null($currentCategoryName)) { ?>
                             </optgroup>
-                       <?php  } 
+                       <?php  }
                         $currentCategoryName = $subcategory->categoryName;
-                       
+
                        ?>
                     <optgroup label="<?= $subcategory->categoryName ?>"<?php echo !$results['article']->categoryId ? 'selected' : ''?>">
-                   
+
                     <?php } ?>
                       <option value="<?php echo $subcategory->id?>"<?php echo ( $subcategory->id == $results['article']->subcategoryId ) ? " selected" : ""?>><?php echo htmlspecialchars( $subcategory->name )?></option>
-                <?php } ?>   
+                <?php } ?>
                     </optgroup>
                 </select>
               </li>
-               
-              <li>    
+
+              <li>
                 <lebel for="authors">Авторы</lebel>
                 <select name="authors[]" multiple required>
                     <option value=""<?php echo !$results['article']->authors ? " selected" : "" ?> disabled>(Не выбрано)</option>
-                    <?php 
+                    <?php
 
                         $authorsIdList = array_map(
                           fn(User $author): int => $author->id,
@@ -66,18 +85,18 @@
                         <option value="<?= $user->id?>"<?= (in_array($user->id, $authorsIdList)) ? " selected" : "" ?>><?php echo htmlspecialchars( $user->login )?></option>
                       <?php } ?>
                   </select>
-              </li>  
-              
+              </li>
+
               <li>
                 <label for="publicationDate">Дата публикации</label>
                 <input type="date" name="publicationDate" id="publicationDate" placeholder="YYYY-MM-DD" required maxlength="10" value="<?php echo $results['article']->publicationDate ? date( "Y-m-d", $results['article']->publicationDate ) : "" ?>" />
               </li>
-              
+
               <li>
                   <label for="active">Активность</label>
                   <input type="checkbox" name="active" id="active" value="1" <?= $results['article']->active ? 'checked' : '' ?> />
-              </li> 
-             
+              </li>
+
             </ul>
 
             <div class="buttons">
@@ -93,7 +112,6 @@
               </a>
           </p>
     <?php } ?>
-	  
+
 <?php include "templates/include/footer.php" ?>
 
-              

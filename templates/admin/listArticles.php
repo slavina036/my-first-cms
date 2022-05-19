@@ -2,7 +2,7 @@
 <?php include "templates/admin/include/header.php" ?>
 
     <h1>Все статьи</h1>
-    
+
     <?php if ( isset( $results['errorMessage'] ) ) { ?>
             <div class="errorMessage"><?php echo $results['errorMessage'] ?></div>
     <?php } ?>
@@ -19,6 +19,8 @@
               <th>Категория</th>
               <th>Подкатегория</th>
               <th>Авторы</th>
+              <th>Уникальные просмотры</th>
+              <th>Все просмотры</th>
               <th>Активность</th>
             </tr>
 
@@ -70,8 +72,17 @@
               </td>
 
               <td>
+                  <?php echo $article->uniqueViews?>
+              </td>
+
+              <td>
+                  <?php echo $article->allViews?>
+              </td>
+
+              <td>
                   <input type="checkbox" name="active" id="active" value="1" <?= $article->active ? 'checked' : '' ?> disabled>
               </td>
+
             </tr>
 
     <?php } ?>

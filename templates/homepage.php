@@ -1,10 +1,6 @@
 
 <?php include "templates/include/header.php" ?>
     <ul id="headlines">
-<?php // echo "<pre>";
-//    print_r($results);
-//    echo "</pre>";
-//    ?>
     <?php foreach ($results['articles'] as $article) { ?>
         <li class='<?php echo $article->id?>'>
             <h2>
@@ -32,7 +28,7 @@
 
                 <?php if (isset($article->subcategoryId)) { ?>
                     <span class="category">
-                        Подкатегрия:
+                        Подкатегория:
                         <a href=".?action=archive&amp;subcategoryId=<?php echo $article->subcategoryId?>">
 
                             <?php echo htmlspecialchars($results['subcategories'][$article->subcategoryId]->name )?>
@@ -44,11 +40,10 @@
                     <span class="category">
                         <?php echo "Без категории"?>
                     </span>
-        <?php } ?>
+                <?php } ?>
 
                 <span class="category">
                     Авторы:
-
                     <br>
                     <?php
                         foreach ($article->authors as $key => $author) { ?>
@@ -58,21 +53,36 @@
                     <?php } ?>
                 </span>
 
+                <span class="category">
+                    Уникальных просмотров:
+                    <a><?= $article->uniqueViews?></a>
+                </span>
+
+                <span class="category">
+                    Всего просмотров:
+                    <a><?= $article->allViews?></a>
+                </span>
+
             </h2>
-            <p class="summary"><?php echo mb_substr(htmlspecialchars($article->content), 0, 50, 'utf8').'...'?></p>
+
+            <p class="summary" data-contentId="<?php echo $article->id?>"><?php echo mb_substr(htmlspecialchars($article->content), 0, 50, 'utf8').'...'?></p>
             <img id="loader-identity" src="JS/ajax-loader.gif" alt="gif">
 
             <ul class="ajax-load">
-                <li><a href=".?action=viewArticle&amp;articleId=<?php echo $article->id?>" class="ajaxArticleBodyByPost" data-contentId="<?php echo $article->id?>">Показать продолжение (POST)</a></li>
-                <li><a href=".?action=viewArticle&amp;articleId=<?php echo $article->id?>" class="ajaxArticleBodyByGet" data-contentId="<?php echo $article->id?>">Показать продолжение (GET)</a></li>
-                <li><a href=".?action=viewArticle&amp;articleId=<?php echo $article->id?>" class="">(POST) -- NEW</a></li>
-                <li><a href=".?action=viewArticle&amp;articleId=<?php echo $article->id?>" class="">(GET)  -- NEW</a></li>
+                <li><a class="ajaxArticleBodyByPost" data-contentId="<?php echo $article->id?>">Показать продолжение (POST)</a></li>
+                <li><a class="ajaxArticleBodyByGet" data-contentId="<?php echo $article->id?>">Показать продолжение (GET)</a></li>
             </ul>
+
+            <ul class="new-ajax-load">
+                <li><a class="newAjaxArticleBodyByPost" data-contentId="<?php echo $article->id?>">NEW Показать продолжение (POST)</a></li>
+                <li><a class="newAjaxArticleBodyByGet" data-contentId="<?php echo $article->id?>">NEW Показать продолжение (GET)</a></li>
+            </ul>
+
+
             <a href=".?action=viewArticle&amp;articleId=<?php echo $article->id?>" class="showContent" data-contentId="<?php echo $article->id?>">Показать полностью</a>
         </li>
+
     <?php } ?>
     </ul>
     <p><a href="./?action=archive">Архив статей</a></p>
 <?php include "templates/include/footer.php" ?>
-
-

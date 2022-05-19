@@ -49,9 +49,30 @@ class Article
     public array $authors = [];
 
     /**
-    *
+    * Количество уникальных просмотров статьи
+    */
+    public $uniqueViews = null;
+
+    /**
+    * Общее количество просмотров статьи
+    */
+    public $allViews = null;
+
+    /**
+    *Активность
     */
     public ?int $active = null;
+
+    /**
+    *Следующая сатья
+    */
+    public ?int $nextArticleId = null;
+
+    /**
+    *Предыдущая сатья
+    */
+    public ?int $previousArticleId = null;
+
 
 
     /**
@@ -63,39 +84,59 @@ class Article
     {
 
         if (isset($data['id'])) {
-          $this->id = (int) $data['id'];
-      }
+            $this->id = (int) $data['id'];
+        }
 
-      if (isset( $data['publicationDate'])) {
-          $this->publicationDate = (string) $data['publicationDate'];
-      }
+        if (isset( $data['publicationDate'])) {
+            $this->publicationDate = (string) $data['publicationDate'];
+        }
 
-      if (isset($data['title'])) {
-          $this->title = $data['title'];
-      }
+        if (isset($data['title'])) {
+            $this->title = $data['title'];
+        }
 
-      if (isset($data['categoryId'])) {
-          $this->categoryId = (int) $data['categoryId'];
-      }
+        if (isset($data['categoryId'])) {
+            $this->categoryId = (int) $data['categoryId'];
+        }
 
-      if (isset($data['subcategoryId'])) {
-          $this->subcategoryId = (int) $data['subcategoryId'];
-      }
+        if (isset($data['subcategoryId'])) {
+            $this->subcategoryId = (int) $data['subcategoryId'];
+        }
 
-      if (isset($data['summary'])) {
-          $this->summary = $data['summary'];
-      }
+        if (isset($data['summary'])) {
+            $this->summary = $data['summary'];
+        }
 
-      if (isset($data['content'])) {
-          $this->content = $data['content'];
-      }
+        if (isset($data['content'])) {
+            $this->content = $data['content'];
+        }
 
-      if (isset($data['authors'])) {
-          $this->authors = (array) $data['authors'];
-      }
+        if (isset($data['authors'])) {
+            $this->authors = (array) $data['authors'];
+        }
 
-      $this->active = !empty($data['active']);
-     }
+        if (isset($data['unique_views'])) {
+            $this->uniqueViews = $data['unique_views'];
+        }
+
+        if (isset($data['all_views'])) {
+            $this->allViews = $data['all_views'];
+        }
+
+        $this->active = !empty($data['active']);
+
+        if (isset($data['previousArticleId'])) {
+            $this->previousArticleId = $data['previousArticleId'];
+        }
+
+        if (isset($data['nextArticleId'])) {
+            $this->nextArticleId = $data['nextArticleId'];
+        }
+
+        if (isset($data['listArticlesIdTitle'])) {
+            $this->listArticlesIdTitle = (array) $data['listArticlesIdTitle'];
+        }
+    }
 
 
     /**
@@ -149,8 +190,16 @@ class Article
     public static function getById($id) {
 
         $conn = new PDO( DB_DSN, DB_USERNAME, DB_PASSWORD );
-        $sql = "SELECT *, UNIX_TIMESTAMP(publicationDate) "
-                . "AS publicationDate FROM articles WHERE id = :id";
+        $sql = 'WITH table_all_views as (select vc.articleId, SUM(vc.views) '
+           . ' as all_views from view_counter vc WHERE vc.articleId = :id group by vc.articleId),'
+           . ' table_unique_views as (select vc.articleId, COUNT(*) '
+           . ' as unique_views from view_counter vc WHERE vc.articleId = :id group by vc.articleId)'
+           . ' SELECT a.*, uv.*, av.*, pa.id AS previousArticleId, UNIX_TIMESTAMP(a.publicationDate) '
+           . ' AS publicationDate FROM articles AS a'
+           . ' LEFT JOIN table_unique_views AS uv ON uv.articleId = a.id '
+           . ' LEFT JOIN table_all_views AS av ON av.articleId = a.id'
+           . ' LEFT JOIN articles AS pa ON a.id = pa.nextArticleId'
+           . ' WHERE a.id = :id';
         $st = $conn->prepare($sql);
         $st->bindValue(":id", $id, PDO::PARAM_INT);
         $st->execute();
@@ -189,6 +238,27 @@ class Article
         return $authors;
     }
 
+    /**listArticlesIdTitle
+     * Получаем из базы данных список названий и ID статей
+     */
+    public static function getListArticlesIdTitle()
+    {
+        $conn = new PDO( DB_DSN, DB_USERNAME, DB_PASSWORD );
+        $sql = "SELECT a.id, a.title  FROM articles a";
+        $st = $conn->prepare($sql);
+        $st->execute();
+
+        $listArticlesIdTitle = array();
+        while ($row = $st->fetch()) {
+            $articleIdTitle = new Article($row);
+            $listArticlesIdTitle[] = $articleIdTitle;
+        }
+//echo "<pre>";
+//print_r($listArticlesIdTitle);
+//echo "</pre>";
+//die();
+        return $listArticlesIdTitle;
+    }
 
     /**
     * Возвращает все (или диапазон) объекты Article из базы данных
@@ -199,42 +269,53 @@ class Article
     * @param string $order Столбец, по которому выполняется сортировка статей (по умолчанию = "publicationDate DESC")
     * @return Array|false Двух элементный массив: results => массив объектов Article; totalRows => общее количество строк
     */
-    public static function getList($numRows=1000000, $categoryId=null,
-                                   $order="publicationDate DESC", $active=null,
-                                   $subcategoryId=null, $userId=null)
+    public static function getList(int $numRows = 1000000, $categoryId = null,
+                                   $order = "publicationDate DESC", $active = null,
+                                   $subcategoryId = null, $pageCurrent = 1,
+                                   $userId = null, bool $countViews = true)
     {
         $conn = new PDO(DB_DSN, DB_USERNAME, DB_PASSWORD);
+
+        $offset = ($pageCurrent - 1) * $numRows;
+        $offset .= ", ";
+
+        $withPart = $countViews ? 'WITH table_all_views as (select vc.articleId, SUM(vc.views) '
+           . ' as all_views from view_counter vc group by vc.articleId),'
+           . ' table_unique_views as (select vc.articleId, COUNT(*) '
+           . ' as unique_views from view_counter vc group by vc.articleId)' : '';
+
         $fromPart = "FROM articles";
+
+        $clauseJoin = $countViews ? 'LEFT JOIN table_unique_views ON table_unique_views.articleId = articles.id '
+            .'LEFT JOIN table_all_views ON table_all_views.articleId = articles.id ' : '';
+
         $clause = '';
+        $clauses = [];
 
         if (!empty($userId)) {
-            $clause = " JOIN users_articles ON users_articles.articleId = articles.id "
-                    . "WHERE users_articles.userId = :userId ";
-        } else {
-
-            $clauses = [];
-
-            if (!empty($categoryId)) {
-                $clauses[] = 'categoryId = :categoryId';
-            }
-            if (!empty($active)) {
-                $clauses[] = 'active= :active';
-            }
-            if (!empty($subcategoryId)) {
-                $clauses[] = 'subcategoryId = :subcategoryId';
-            }
-
-            $clause = implode(' AND ', $clauses);
-
-            if (!empty($clause)) {
-                $clause = " WHERE $clause ";
-            }
+            $clause .= " JOIN users_articles ON users_articles.articleId = articles.id ";
+            $clauses[] = 'users_articles.userId = :userId';
         }
 
-        $sql = "SELECT *, UNIX_TIMESTAMP(publicationDate)
+        if (!empty($categoryId)) {
+            $clauses[] = 'categoryId = :categoryId';
+        }
+        if (!empty($active)) {
+            $clauses[] = 'active= :active';
+        }
+        if (!empty($subcategoryId)) {
+            $clauses[] = 'subcategoryId = :subcategoryId';
+        }
+
+        $conditions = implode(' AND ', $clauses);
+
+        if (!empty($conditions)) {
+            $clause .= " WHERE $conditions ";
+        }
+        $sql = "$withPart SELECT *, UNIX_TIMESTAMP(publicationDate)
                 AS publicationDate
-                $fromPart $clause
-                ORDER BY  $order  LIMIT :numRows";
+                $fromPart $clauseJoin $clause
+                ORDER BY  $order  LIMIT $offset :numRows";
         $st = $conn->prepare($sql);
 //                        echo "<pre>";
 //                        print_r($st);
@@ -253,6 +334,7 @@ class Article
 
         if ($userId)
             $st->bindValue( ":userId", $userId, PDO::PARAM_INT);
+
 
         $st->execute(); // выполняем запрос к базе данных
 //                        echo "<pre>";
@@ -299,7 +381,7 @@ class Article
         if ( !is_null( $this->id ) ) trigger_error ( "Article::insert(): Attempt to insert an Article object that already has its ID property set (to $this->id).", E_USER_ERROR );
         // Вставляем статью
         $conn = new PDO( DB_DSN, DB_USERNAME, DB_PASSWORD );
-        $sql = "INSERT INTO articles ( publicationDate, categoryId, subcategoryId, title, summary, content, active ) VALUES ( FROM_UNIXTIME(:publicationDate), :categoryId, :subcategoryId, :title, :summary, :content, :active )";
+        $sql = "INSERT INTO articles ( publicationDate, categoryId, subcategoryId, title, summary, content, active, nextArticleId ) VALUES ( FROM_UNIXTIME(:publicationDate), :categoryId, :subcategoryId, :title, :summary, :content, :active, :nextArticleId )";
         $st = $conn->prepare ( $sql );
         $st->bindValue( ":publicationDate", $this->publicationDate, PDO::PARAM_INT );
         $st->bindValue( ":categoryId", $this->categoryId, PDO::PARAM_INT );
@@ -308,6 +390,7 @@ class Article
         $st->bindValue( ":summary", $this->summary, PDO::PARAM_STR );
         $st->bindValue( ":content", $this->content, PDO::PARAM_STR );
         $st->bindValue( ":active", $this->active, PDO::PARAM_INT );
+        $st->bindValue( ":nextArticleId", $this->nextArticleId, PDO::PARAM_INT );
         $st->execute();
         $this->id = $conn->lastInsertId();
         $conn = null;
@@ -328,7 +411,10 @@ class Article
     * Обновляем текущий объект статьи в базе данных
     */
     public function update() {
-
+//        echo "<pre>";
+//        print_r($this);
+//        echo "</pre>";
+//        die();
         // Есть ли у объекта статьи ID?
         if ( is_null( $this->id ) ) trigger_error ( "Article::update(): "
             . "Attempt to update an Article object "
@@ -337,8 +423,9 @@ class Article
         // Обновляем статью
         $conn = new PDO( DB_DSN, DB_USERNAME, DB_PASSWORD );
         $sql = "UPDATE articles SET publicationDate=FROM_UNIXTIME(:publicationDate),"
-            . " categoryId=:categoryId, subcategoryId=:subcategoryId, title=:title, "
-            . " summary=:summary, active=:active, content=:content WHERE id = :id";
+             . " categoryId=:categoryId, subcategoryId=:subcategoryId, title=:title,"
+             . " summary=:summary, active=:active, content=:content,"
+             . " nextArticleId=:nextArticleId WHERE id = :id";
 
         $st = $conn->prepare ( $sql );
         $st->bindValue( ":publicationDate", $this->publicationDate, PDO::PARAM_INT );
@@ -349,6 +436,7 @@ class Article
         $st->bindValue( ":content", $this->content, PDO::PARAM_STR );
         $st->bindValue( ":active", $this->active, PDO::PARAM_INT );
         $st->bindValue( ":id", $this->id, PDO::PARAM_INT );
+        $st->bindValue( ":nextArticleId", $this->nextArticleId, PDO::PARAM_INT );
         $st->execute();
         $conn = null;
 

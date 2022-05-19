@@ -11,7 +11,7 @@ if (isset ($_POST['articleId'])) {
     echo json_encode($article);
 //        die("Привет)");
 //    $conn = new PDO( DB_DSN, DB_USERNAME, DB_PASSWORD );
-//    
+//
 //        if (isset($conn)) {
 //            die("Соединенте установлено");
 //        }

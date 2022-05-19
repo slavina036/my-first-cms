@@ -1,11 +1,11 @@
 <?php include "templates/include/header.php" ?>
-	  
+
     <h1><?php echo htmlspecialchars( $results['pageHeading'] ) ?></h1>
-    
+
     <?php if ( $results['category'] ) { ?>
     <h3 class="categoryDescription"><?php echo htmlspecialchars( $results['category']->description ) ?></h3>
     <?php } ?>
-    
+
     <?php if ( $results['subcategory'] ) { ?>
     <h3 class="categoryDescription"><?php echo htmlspecialchars( $results['subcategory']->description ) ?></h3>
     <?php } ?>
@@ -24,28 +24,28 @@
                         </a>
 
                     <?php if ( !$results['category'] && $article->categoryId ) { ?>
-                    <span class="category">Категория: 
+                    <span class="category">Категория:
                         <a href=".?action=archive&amp;categoryId=<?php echo $article->categoryId?>">
                             <?php echo htmlspecialchars( $results['categories'][$article->categoryId]->name ) ?>
                         </a>
                     </span>
-                    <?php } ?>          
-                    
+                    <?php } ?>
+
                         <?php if (isset($article->subcategoryId)) { ?>
-                    <span class="category">Подкатегория: 
+                    <span class="category">Подкатегория:
                         <a href=".?action=archive&amp;subcategoryId=<?php echo $article->subcategoryId?>">
                             <?php echo htmlspecialchars($results['subcategories'][$article->subcategoryId]->name )?>
                         </a>
                     </span>
-                <?php } 
+                <?php }
                 else { ?>
                     <span class="category">
                         <?php echo "Без подкатегории"?>
                     </span>
-        <?php } ?>    
-                    
+        <?php } ?>
+
                 <span class="category">
-                    Авторы: 
+                    Авторы:
                     <br>
                     <?php foreach ($article->authors as $key => $author) { ?>
                     <a href=".?action=archive&amp;userId=<?php echo $author->id?>">
@@ -53,7 +53,7 @@
                     </a><br>
                     <?php } ?>
                 </span>
-                    
+
                 </h2>
               <p class="summary"><?php echo htmlspecialchars( $article->summary )?></p>
             </li>
@@ -62,8 +62,10 @@
 
     </ul>
 
+    <?php include "templates/include/paginator.php" ?>
+
     <p>Всего статей: <?php echo $results['totalRows']?></p>
 
     <p><a href="./">Вернуться на главную страницу</a></p>
-	  
+
 <?php include "templates/include/footer.php" ?>

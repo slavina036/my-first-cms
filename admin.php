@@ -57,7 +57,7 @@ switch ($action) {
         editUser();
         break;
     case 'deleteUser':
-        deleteUser(); 
+        deleteUser();
         break;
     case 'listUsers':
         listUsers();
@@ -78,27 +78,27 @@ function login() {
 
         // Пользователь получает форму входа: попытка авторизировать пользователя
 
-        if ($_POST['username'] == ADMIN_USERNAME 
+        if ($_POST['username'] == ADMIN_USERNAME
                 && $_POST['password'] == ADMIN_PASSWORD) {
-            
+
             // Вход прошел успешно: создаем сессию и перенаправляем на страницу администратора
-            
+
             $_SESSION['username'] = ADMIN_USERNAME;
             header( "Location: admin.php");
-            
+
         } else if (getlog($_POST['username'], $_POST['password'])){
-                
+
             // Вход прошел успешно: создаем сессию и перенаправляем на страницу администратора
             $_SESSION['username'] = ADMIN_USERNAME;
-            header( "Location: admin.php");   
-            
-            } else { 
+            header( "Location: admin.php");
+
+            } else {
 
                 // Ошибка входа: выводим сообщение об ошибке для пользователя
                 $results['errorMessage'] = "Неправильный пароль, попробуйте ещё раз.";
                 require( TEMPLATE_PATH . "/admin/loginForm.php" );
             }
-        
+
     } else {
 
       // Пользователь еще не получил форму: выводим форму
@@ -109,8 +109,8 @@ function login() {
 
 /**
 * Проверяем логин, пароль и активность пользователя для авторизации
-*/ 
-function getlog ($login, $password) 
+*/
+function getlog ($login, $password)
 {
     $conn = new PDO( DB_DSN, DB_USERNAME, DB_PASSWORD );
     $sql = "SELECT * FROM users "
@@ -135,7 +135,7 @@ function logout() {
 
 
 function newArticle() {
-	  
+
     $results = array();
     $results['pageTitle'] = "Новая статья";
     $results['formAction'] = "newArticle";
@@ -154,7 +154,7 @@ function newArticle() {
 //            print_r($article);
 //            echo "<pre>";
 //            die();
-//            А здесь данные массива $article уже неполные(есть только Число от даты, категория и полный текст статьи)          
+//            А здесь данные массива $article уже неполные(есть только Число от даты, категория и полный текст статьи)
         $article->insert();
         header( "Location: admin.php?status=changesSaved" );
 
@@ -170,6 +170,7 @@ function newArticle() {
         $results['categories'] = $data['results'];
         $results['subcategories'] = Subcategory::getList(order: 'sc.categoryId');
         $results['authors'] = User::getList();
+        $results['listArticlesIdTitle'] = Article::getListArticlesIdTitle();
         require( TEMPLATE_PATH . "/admin/editArticle.php" );
     }
 }
@@ -177,11 +178,11 @@ function newArticle() {
 
 /**
  * Редактирование статьи
- * 
+ *
  * @return null
  */
 function editArticle() {
-	  
+
     $results = array();
     $results['pageTitle'] = "Редактирование статьи";
     $results['formAction'] = "editArticle";
@@ -194,7 +195,7 @@ function editArticle() {
             return;
         }
 
-        
+
         $article->storeFormValues( $_POST );
         $article->update();
         header( "Location: admin.php?status=changesSaved" );
@@ -211,6 +212,7 @@ function editArticle() {
         $results['categories'] = $data['results'];
         $results['subcategories'] = Subcategory::getList(order: 'sc.categoryId');
         $results['authors'] = User::getList();
+        $results['listArticlesIdTitle'] = Article::getListArticlesIdTitle();
         require(TEMPLATE_PATH . "/admin/editArticle.php");
     }
 
@@ -231,26 +233,26 @@ function deleteArticle() {
 
 function listArticles() {
     $results = array();
-    
+
     $data = Article::getList();
     $results['articles'] = $data['results'];
     $results['totalRows'] = $data['totalRows'];
-    
+
     $data = Category::getList();
     $results['categories'] = array();
-    foreach ($data['results'] as $category) { 
+    foreach ($data['results'] as $category) {
         $results['categories'][$category->id] = $category;
     }
     $data = Subcategory::getList();
     $results['subcategories'] = array();
-    foreach ($data['results'] as $subcategory) { 
+    foreach ($data['results'] as $subcategory) {
         $results['subcategories'][$subcategory->id] = $subcategory;
     }
-    
+
     $results['pageTitle'] = "Список статей";
 
     if (isset($_GET['error'])) { // вывод сообщения об ошибке (если есть)
-        if ($_GET['error'] == "articleNotFound") 
+        if ($_GET['error'] == "articleNotFound")
             $results['errorMessage'] = "Error: Article not found.";
     }
 
@@ -285,8 +287,8 @@ function listCategories() {
 
     require( TEMPLATE_PATH . "/admin/listCategories.php" );
 }
-	  
-	  
+
+
 function newCategory() {
 
     $results = array();
@@ -369,24 +371,24 @@ function deleteCategory() {
 
 /**
  * Список подкатегорий
- * 
+ *
  * @return null
  */
 
 function listSubcategories() {
     $results = array();
-    
+
     $data = Subcategory::getList();
     $results['subcategories'] = $data['results'];
     $results['totalRows'] = $data['totalRows'];
     $results['pageTitle'] = "Список подкатегорий";
-    
+
     $data = Category::getList();
     $results['categories'] = array();
-    foreach ($data['results'] as $category) { 
+    foreach ($data['results'] as $category) {
         $results['categories'][$category->id] = $category;
     }
-    
+
 
     if ( isset( $_GET['error'] ) ) {
         if ( $_GET['error'] == "subcategoryNotFound" ) $results['errorMessage'] = "Ошибка: подкатегория не найдена";
@@ -400,11 +402,11 @@ function listSubcategories() {
 
     require( TEMPLATE_PATH . "/admin/listSubcategories.php" );
 }
-	  
+
 
 /**
  * Создание новой подкатегории
- * 
+ *
  * @return null
  */
 function newSubcategory() {
@@ -439,7 +441,7 @@ function newSubcategory() {
 
 /**
  * Редактирование подкатегори
- * 
+ *
  * @return null
  */
 function editSubcategory() {
@@ -473,7 +475,7 @@ function editSubcategory() {
         $results['subcategories'] = Subcategory::getList(order: 'sc.categoryId');
         $data = Category::getList();
         $results['categories'] = $data['results'];
-        
+
         require( TEMPLATE_PATH . "/admin/editSubcategory.php" );
     }
 
@@ -482,7 +484,7 @@ function editSubcategory() {
 
 /**
  * Удаление подкатегории
- * 
+ *
  * @return null
  */
 function deleteSubcategory() {
@@ -504,7 +506,7 @@ function deleteSubcategory() {
 
 
 function newUser() {
-	  
+
     $results = array();
     $results['pageTitle'] = "Новый пользователь";
     $results['formAction'] = "newUser";
@@ -526,10 +528,10 @@ function newUser() {
         require( TEMPLATE_PATH . "/admin/editUser.php" );
     }
 }
- 
+
 
 function editUser() {
-	  
+
     $results = array();
     $results['pageTitle'] = "Редактирование данных пользователя";
     $results['formAction'] = "editUser";
@@ -566,7 +568,14 @@ function deleteUser() {
         header( "Location: admin.php?action=listUsers&error=userNotFound" );
         return;
     }
-    
+
+    $articles = Article::getList(numRows: 1000000, userId: $user->id );
+
+    if ( $articles['totalRows'] > 0 ) {
+        header( "Location: admin.php?action=listUsers&error=userContainsArticles" );
+        return;
+    }
+
     $user->delete();
     header("Location: admin.php?action=listUsers&status=userDeleted");
 }
@@ -574,17 +583,18 @@ function deleteUser() {
 
 function listUsers() {
     $results = array();
-    
+
     $data = User::getList();
     $results['users'] = $data['results'];
     $results['totalRows'] = $data['totalRows'];
-    
+
     $results['pageTitle'] = "Список всех пользователи";
 
     if ( isset( $_GET['error'] ) ) {
         if ( $_GET['error'] == "userNotFound" ) $results['errorMessage'] = "Ошибка: пользователь не найден.";
+        if ( $_GET['error'] == "userContainsArticles" ) $results['errorMessage'] = "Ошибка: Пользователь является автором или соавторм.";
     }
-    
+
     if (isset($_GET['status'])) { // вывод сообщения (если есть)
         if ($_GET['status'] == "changesSaved") {
             $results['statusMessage'] = "Ваши изменения сохранены.";

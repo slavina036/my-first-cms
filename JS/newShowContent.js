@@ -1,26 +1,31 @@
 $(function(){
     
-    console.log('Привет, это старый js ))');
-    init_get();
-    init_post();
+    console.log('Привет, это новый js ))');
+    new_init_get();
+    new_init_post();
 });
 
-function init_get() 
+function new_init_get() 
 {
-    $('a.ajaxArticleBodyByGet').one('click', function(){
+    $('a.newAjaxArticleBodyByGet').click(function(){
         
         var contentId = $(this).attr('data-contentId');
-
+        console.log('li.' + contentId);
+        console.log($(this).parents('li.' + contentId));
+        let liTag = $(this).parents('li.' + contentId);
+        let pTag = liTag.find('p.summary');
+        console.log(liTag.find('p.summary'));
         console.log('ID статьи = ', contentId); 
         showLoaderIdentity();
         $.ajax({
-            url:'/ajax/showContentsHandler.php?articleId=' + contentId,
+            url:'/ajax/newShowContentsHandler.php?articleId=' + contentId,
             dataType: 'text'
         })
         .done (function(obj){
             hideLoaderIdentity();
             console.log('Ответ получен', obj);
-            $('li.' + contentId).append(obj);
+            console.log('replaceWith', pTag);
+            pTag.text(obj);
         })
         .fail(function(xhr, status, error){
             hideLoaderIdentity();
@@ -37,13 +42,17 @@ function init_get()
     });  
 }
 
-function init_post() 
+function new_init_post() 
 {
-    $('a.ajaxArticleBodyByPost').one('click', function(){
+    $('a.newAjaxArticleBodyByPost').click(function(){
         var contentId = $(this).attr('data-contentId');
+        console.log('newID статьи = ', contentId);
+//        console.log('li.' + contentId);
+        let liTag = $(this).parents('li.' + contentId);
+        let pTag = liTag.find('p.summary');
         showLoaderIdentity();
         $.ajax({
-            url:'/ajax/showContentsHandler.php',
+            url:'/ajax/newShowContentsHandler.php',
             dataType: 'json',
 //            converters: 'json text',
             data: { articleId: contentId},
@@ -52,8 +61,8 @@ function init_post()
         })
         .done (function(obj){
             hideLoaderIdentity();
-            console.log('Ответ получен', obj);
-            $('li.' + contentId).append(obj.content)
+            console.log('Ответ получен', obj.content);
+            pTag.text( obj.content );
         })
         .fail(function(xhr, status, error){
             hideLoaderIdentity();

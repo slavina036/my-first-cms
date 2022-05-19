@@ -1,5 +1,7 @@
 /* Стили для body and внешнего контейнера */
-	 
+
+/** { border: 1px solid black; }*/
+
 body {
   margin: 0;
   color: #333;
@@ -353,3 +355,106 @@ ul.ajax-load li {
     font-size: 12px;
 }
 
+ul.new-ajax-load {
+    margin-left:  0px;
+    padding-left: 10px;
+}
+ul.new-ajax-load li {
+    display: inline; /* Отображать как строчный элемент */
+    margin-right: 5px; /* Отступ слева */
+    border: 1px solid #000; /* Рамка вокруг текста */
+    padding: 3px; /* Поля вокруг текста */
+    font-size: 12px;
+    cursor: pointer;
+}
+
+
+/* Пагинация */
+
+#container.tabset {
+	margin: 0 0 20px;
+	padding: 0;
+	overflow: hidden;
+	float:left;
+	position:relative;
+	z-index:100;
+	border:0;
+	background: url(../images/backgrounds/bg-new-line.gif) repeat-x 0 100%;
+}
+#container .tabset li {
+	list-style: none;
+	background-image: none;
+	float:left;
+	margin:0;
+	padding:0;
+	border:0;
+}
+#container .tabset li a {
+	float: left;
+    font-size: 18px;
+    height: 40px;
+    line-height: 38px;
+    padding: 0 15px;
+	background:#f5f7fa;
+	color:#5b5d63;
+	text-align:center;
+	text-decoration:none;
+	border: 1px solid #e9eaed;
+	-webkit-transition: background .2s ease-in-out, border-bottom-color .2s ease-in-out, color .2s ease-in-out;
+	-moz-transition: background .2s ease-in-out, border-bottom-color .2s ease-in-out, color .2s ease-in-out;
+	-ms-transition: background .2s ease-in-out, border-bottom-color .2s ease-in-out, color .2s ease-in-out;
+	-o-transition: background .2s ease-in-out, border-bottom-color .2s ease-in-out, color .2s ease-in-out;
+	transition: background .2s ease-in-out, border-bottom-color .2s ease-in-out, color .2s ease-in-out;
+}
+#container .tabset li a:hover {
+	background:#181b22;
+	color:#fff;
+}
+#container .tabset li a.active {
+	background:#fff;
+	border-bottom-color:#e9eaed;;
+	color:#5b5d63;
+	cursor:default;
+}
+#container .tabset li a.skipping {
+	background:#fff;
+	color:#5b5d63;
+	cursor:default;
+}
+#container .tabset li:first-child a {
+	-webkit-border-radius: 8px 0 0 0;
+	-moz-border-radius: 8px 0 0 0;
+	border-radius: 8px 0 0 0;
+}
+#container .tabset li:last-child a {
+	-webkit-border-radius: 0 8px 0 0;
+	-moz-border-radius: 0 8px 0 0;
+	border-radius: 0 8px 0 0;
+}
+/*.tabset li a.active {display:none;}*/
+#container .tab-content {
+	margin:0 0 20px;
+	position:absolute;
+	top:-99999px;
+	left:-999999px;
+	padding:20px 0 0;
+}
+a#previous, a#next {
+    text-decoration: none;
+    display: inline-block;
+    padding: 8px 16px;
+}
+
+a#previous:hover,a#next:hover {
+    background-color: #ddd;
+    color: #333;
+}
+
+#previous {
+    background-color: #f1f1f1;
+    color: #333;
+}
+#next {
+    background-color: #edaa46;
+    color: #333;
+}
